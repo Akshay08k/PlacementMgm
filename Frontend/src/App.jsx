@@ -12,8 +12,8 @@ function App() {
 
   return (
     <>
-      <Navbar />
       <BrowserRouter>
+        <Navbar />
         <Routes>
           <Route Component={Homepage} path="/"></Route>
           <Route Component={SignInPage} path="/signin"></Route>

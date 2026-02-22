@@ -3,16 +3,16 @@ version: "3.9"
 services:
   postgres:
     image: postgres:16
-    container_name: pmgs-db
+    container_name: pgms-db-container
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgre123
       POSTGRES_DB: mydb
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgms-db-data:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  pgms-db-data:

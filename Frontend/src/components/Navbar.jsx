@@ -4,7 +4,7 @@ import { BiLogOut, BiLogIn } from 'react-icons/bi'
 const Navbar = () => {
     return (
         <>
-            <nav className="relative z-100 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0">
+            <nav className="  z-100 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0">
                 <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <div className="flex items-center space-x-3">
