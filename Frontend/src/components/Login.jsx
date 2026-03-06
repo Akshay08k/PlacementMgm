@@ -1,12 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaUserGraduate, FaBuilding, FaUserTie, FaUserShield } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContent";
+import { useNavigate } from "react-router-dom";
 
 export default function SignInPage() {
   const [selectedRole, setSelectedRole] = useState(null);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { loginAction, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const roles = [
     { name: "Student", icon: FaUserGraduate },
@@ -18,18 +28,28 @@ export default function SignInPage() {
   const validate = () => {
     const newErrors = {};
     if (!selectedRole) newErrors.role = "Please select a role";
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email";
+    if (!username) newErrors.username = "Username is required";
     if (!password) newErrors.password = "Password is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    console.log({ selectedRole, email, password });
+
+    try {
+      await loginAction({
+        username,
+        password,
+        role: selectedRole
+      });
+      navigate("/");
+    } catch (err) {
+      setErrors({ form: err.response?.data?.detail || "Login failed. Check your credentials." });
+    }
+    
   };
 
   return (
@@ -100,22 +120,25 @@ export default function SignInPage() {
             {errors.role && (
               <p className="text-sm text-red-500 mt-1">{errors.role}</p>
             )}
+            {errors.form && (
+              <p className="text-sm text-red-500 text-center">{errors.form}</p>
+            )}
+
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${errors.email
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${errors.username
                 ? "border-red-400 focus:ring-red-300"
                 : "border-gray-300 focus:ring-emerald-400"
                 }`}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
+            {errors.username && (
+              <p className="text-sm text-red-500">{errors.username}</p>
             )}
 
             <input

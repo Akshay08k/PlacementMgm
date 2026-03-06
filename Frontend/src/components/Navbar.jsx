@@ -1,7 +1,17 @@
 import React from 'react'
 import { BiLogOut, BiLogIn } from 'react-icons/bi'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContent'
 
 const Navbar = () => {
+    const navigate = useNavigate();
+    const { user, role, isAuthenticated, logOut } = useAuth();
+
+    const handleLogout = async () => {
+        await logOut();
+        navigate('/signin');
+    };
+
     return (
         <>
             <nav className="relative z-100 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0">
@@ -33,13 +43,13 @@ const Navbar = () => {
                         )} */}
 
                         <div className="flex items-center space-x-4">
-                            {/* {user ? (
+                            {isAuthenticated ? (
                                 <>
                                     <div className="hidden md:block text-right">
                                         <div className="text-sm font-semibold text-gray-900">
-                                            {user.role === 'company' ? user.companyName : user.name}
+                                            {user?.username || 'User'}
                                         </div>
-                                        <div className="text-xs text-gray-600 capitalize">{user.role}</div>
+                                        <div className="text-xs text-gray-600 capitalize">{role || 'student'}</div>
                                     </div>
                                     <button
                                         onClick={handleLogout}
@@ -49,15 +59,15 @@ const Navbar = () => {
                                         <span>Logout</span>
                                     </button>
                                 </>
-                            ) : ( */}
-                            <button
-                                onClick={() => setShowLoginModal(true)}
-                                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-                            >
-                                <BiLogIn />
-                                <span>Sign In</span>
-                            </button>
-                            {/* )} */}
+                            ) : (
+                                <button
+                                    onClick={() => navigate('/signin')}
+                                    className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+                                >
+                                    <BiLogIn />
+                                    <span>Sign In</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

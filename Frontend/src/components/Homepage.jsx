@@ -3,12 +3,14 @@ import { FaBriefcase, FaUsers, FaChartLine, FaCalendarAlt, FaBuilding, FaGraduat
 import { HiSparkles } from 'react-icons/hi';
 import { MdDashboard, MdNotifications, MdBusiness, MdAssignment, MdEventNote } from 'react-icons/md';
 import { BiLogIn } from 'react-icons/bi';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContent';
 
 export default function LJUPlacementHomePage() {
     const [scrollY, setScrollY] = useState(0);
     const [isVisible, setIsVisible] = useState({});
-
-    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+    const { user, role, isAuthenticated } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -26,10 +28,10 @@ export default function LJUPlacementHomePage() {
     }, []);
 
     const getRoleBasedContent = () => {
-        switch (user?.role) {
+        switch (role) {
             case 'student':
                 return {
-                    title: `Welcome back, ${user.name}!`,
+                    title: `Welcome back, ${user?.username || 'Student'}!`,
                     subtitle: "Explore new placement opportunities and track your applications",
                     quickActions: [
                         { icon: <FaBriefcase />, label: "Browse Jobs", color: "from-green-500 to-emerald-500" },
@@ -47,7 +49,7 @@ export default function LJUPlacementHomePage() {
 
             case 'tpo':
                 return {
-                    title: `Welcome, ${user.name}`,
+                    title: `Welcome, ${user?.username || 'Placement Officer'}`,
                     subtitle: "Training & Placement Officer Dashboard - Manage placements efficiently",
                     quickActions: [
                         { icon: <MdBusiness />, label: "Manage Companies", color: "from-green-500 to-emerald-500" },
@@ -65,7 +67,7 @@ export default function LJUPlacementHomePage() {
 
             case 'company':
                 return {
-                    title: `Welcome, ${user.companyName}`,
+                    title: `Welcome, ${user?.username || 'Recruiter'}`,
                     subtitle: "Post opportunities and find the best talent from LJ University",
                     quickActions: [
                         { icon: <MdAssignment />, label: "Post Job", color: "from-green-500 to-emerald-500" },
@@ -83,7 +85,7 @@ export default function LJUPlacementHomePage() {
 
             case 'admin':
                 return {
-                    title: `Admin Dashboard - ${user.name}`,
+                    title: `Admin Dashboard - ${user?.username || 'Admin'}`,
                     subtitle: "Complete system control and management",
                     quickActions: [
                         { icon: <FaUsers />, label: "User Management", color: "from-green-500 to-emerald-500" },
@@ -106,7 +108,7 @@ export default function LJUPlacementHomePage() {
 
 
 
-    const roleBasedContent = user ? getRoleBasedContent() : null;
+    const roleBasedContent = isAuthenticated ? getRoleBasedContent() : null;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-mint-50 to-emerald-50 overflow-hidden">
@@ -118,7 +120,7 @@ export default function LJUPlacementHomePage() {
             </div>
 
 
-            {user ? (
+            {isAuthenticated ? (
                 // Logged In User Content
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
                     {/* Welcome Section */}
@@ -232,6 +234,7 @@ export default function LJUPlacementHomePage() {
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <button
+                                    onClick={() => navigate('/signin')}
                                     className="group bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
                                 >
                                     <span>Access Portal</span>
@@ -320,7 +323,7 @@ export default function LJUPlacementHomePage() {
                             <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Get Started?</h2>
                             <p className="text-xl mb-8 opacity-90">Join the LJ University Placement Portal today</p>
                             <button
-                                onClick={() => setShowLoginModal(true)}
+                                onClick={() => navigate('/signin')}
                                 className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2"
                             >
                                 <BiLogIn />
