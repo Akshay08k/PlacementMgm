@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaUserGraduate, FaBuilding, FaUserTie, FaUserShield } from "react-icons/fa";
-import { useAuth } from "../contexts/AuthContent";
+import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Footer from "./Footer";
 
 export default function SignInPage() {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -54,7 +55,6 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
-      {/* Navbar */}
       <nav className="px-8 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-emerald-700">
           Placement Management System
@@ -62,7 +62,6 @@ export default function SignInPage() {
         <img src="https://ljku.edu.in/web/image/course.program/14/website_logo" height={30} width={400}></img>
       </nav>
 
-      {/* Main */}
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-md">
           <h2 className="text-3xl font-semibold text-center text-gray-800 mb-2">
@@ -72,7 +71,6 @@ export default function SignInPage() {
             Continue to placement portal
           </p>
 
-          {/* Role dropdown */}
           <div className="relative mb-4">
             <button
               type="button"
@@ -168,10 +166,7 @@ export default function SignInPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-4">
-        © {new Date().getFullYear()} XYZ College of Engineering. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -4,7 +4,8 @@ import { HiSparkles } from 'react-icons/hi';
 import { MdDashboard, MdNotifications, MdBusiness, MdAssignment, MdEventNote } from 'react-icons/md';
 import { BiLogIn } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContent';
+import { useAuth } from '../contexts/AuthContext';
+import Footer from "./Footer";
 
 export default function LJUPlacementHomePage() {
     const [scrollY, setScrollY] = useState(0);
@@ -27,6 +28,8 @@ export default function LJUPlacementHomePage() {
         return () => timers.forEach(clearTimeout);
     }, []);
 
+
+    console.log(user)
     const getRoleBasedContent = () => {
         switch (role) {
             case 'student':
@@ -39,13 +42,15 @@ export default function LJUPlacementHomePage() {
                         { icon: <FaCalendarAlt />, label: "Upcoming Drives", color: "from-purple-500 to-pink-500" },
                         { icon: <MdDashboard />, label: "My Profile", color: "from-orange-500 to-red-500" }
                     ],
+
                     stats: [
-                        { number: user.applicationsCount || "5", label: "Applications", icon: <FaFileAlt /> },
+                        { number: user.applicationCount || "5", label: "Applications", icon: <FaFileAlt /> },
                         { number: user.interviewsScheduled || "2", label: "Interviews", icon: <FaCalendarAlt /> },
                         { number: user.offersReceived || "1", label: "Offers", icon: <FaCheckCircle /> },
                         { number: user.profileCompletion || "85%", label: "Profile", icon: <FaGraduationCap /> }
                     ]
                 };
+                
 
             case 'tpo':
                 return {
@@ -106,13 +111,14 @@ export default function LJUPlacementHomePage() {
         }
     };
 
+    console.log(user)
+
 
 
     const roleBasedContent = isAuthenticated ? getRoleBasedContent() : null;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-mint-50 to-emerald-50 overflow-hidden">
-            {/* Animated Background Elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
                 <div className="absolute top-40 right-10 w-72 h-72 bg-mint-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -121,9 +127,7 @@ export default function LJUPlacementHomePage() {
 
 
             {isAuthenticated ? (
-                // Logged In User Content
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
-                    {/* Welcome Section */}
                     <div className={`transform transition-all duration-1000 ${isVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-8 md:p-12 text-white shadow-2xl mb-8">
                             <div className="flex items-center space-x-2 mb-4">
@@ -134,7 +138,6 @@ export default function LJUPlacementHomePage() {
                             <p className="text-xl opacity-90">{roleBasedContent.subtitle}</p>
                         </div>
 
-                        {/* Quick Actions */}
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -152,7 +155,6 @@ export default function LJUPlacementHomePage() {
                             </div>
                         </div>
 
-                        {/* Stats */}
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -168,7 +170,6 @@ export default function LJUPlacementHomePage() {
                             </div>
                         </div>
 
-                        {/* Recent Activity or Notifications */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                                 <div className="flex items-center justify-between mb-4">
@@ -211,9 +212,7 @@ export default function LJUPlacementHomePage() {
                     </div>
                 </div>
             ) : (
-                // Guest/Public Content
                 <>
-                    {/* Hero Section */}
                     <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
                         <div className={`text-center transform transition-all duration-1000 ${isVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full mb-6 animate-bounce-slow">
@@ -237,16 +236,18 @@ export default function LJUPlacementHomePage() {
                                     onClick={() => navigate('/signin')}
                                     className="group bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
                                 >
-                                    <span>Access Portal</span>
+                                    <span>Student Login</span>
                                     <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <button className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold border-2 border-green-500 hover:bg-green-50 transform hover:scale-105 transition-all duration-300">
-                                    Learn More
+                                <button
+                                    onClick={() => navigate('/signin')}
+                                    className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold border-2 border-green-500 hover:bg-green-50 transform hover:scale-105 transition-all duration-300"
+                                >
+                                    Recruiter / TPO / Admin Login
                                 </button>
                             </div>
                         </div>
 
-                        {/* Stats Section */}
                         <div className={`mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 transform transition-all duration-1000 delay-300 ${isVisible.stats ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             {[
                                 { number: "1200+", label: "Students", icon: <FaGraduationCap /> },
@@ -265,7 +266,6 @@ export default function LJUPlacementHomePage() {
                         </div>
                     </section>
 
-                    {/* Who We Serve Section */}
                     <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                         <div className={`text-center mb-16 transform transition-all duration-1000 ${isVisible.features ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -317,7 +317,6 @@ export default function LJUPlacementHomePage() {
                         </div>
                     </section>
 
-                    {/* CTA Section */}
                     <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-12 text-center text-white shadow-2xl transform hover:scale-105 transition-all duration-300">
                             <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Get Started?</h2>
@@ -334,41 +333,7 @@ export default function LJUPlacementHomePage() {
                 </>
             )}
 
-            {/* Footer */}
-            <footer className="relative z-10 bg-gray-900 text-white py-12 mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-3 gap-8 mb-8">
-                        <div>
-                            <img
-                                src="https://ljku.edu.in/web/image/course.program/14/website_logo"
-                                alt="LJ University Logo"
-                                className="h-12 w-auto mb-4"
-                            />
-                            <p className="text-gray-400">LJ University Placement Portal - Empowering futures, one placement at a time.</p>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg mb-4">Quick Links</h4>
-                            <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-green-400 transition-colors">About Us</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Contact</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Terms of Service</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg mb-4">Contact Us</h4>
-                            <ul className="space-y-2 text-gray-400">
-                                <li>LJ University Campus</li>
-                                <li>Email: placements@ljku.edu.in</li>
-                                <li>Phone: +91 XXX XXX XXXX</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="border-t border-gray-800 pt-8 text-center">
-                        <p className="text-gray-400">© 2024 LJ University. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer/>
 
             <style jsx>{`
         @keyframes blob {
