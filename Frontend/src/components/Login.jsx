@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaUserGraduate, FaBuilding, FaUserTie, FaUserShield } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Footer from "./Footer";
 
 export default function SignInPage() {
   const [selectedRole, setSelectedRole] = useState(null);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { loginAction, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const roles = [
     { name: "Student", icon: FaUserGraduate },
@@ -18,23 +29,32 @@ export default function SignInPage() {
   const validate = () => {
     const newErrors = {};
     if (!selectedRole) newErrors.role = "Please select a role";
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email";
+    if (!username) newErrors.username = "Username is required";
     if (!password) newErrors.password = "Password is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    console.log({ selectedRole, email, password });
+
+    try {
+      await loginAction({
+        username,
+        password,
+        role: selectedRole
+      });
+      navigate("/");
+    } catch (err) {
+      setErrors({ form: err.response?.data?.detail || "Login failed. Check your credentials." });
+    }
+    
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
-      {/* Navbar */}
       <nav className="px-8 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-emerald-700">
           Placement Management System
@@ -42,7 +62,6 @@ export default function SignInPage() {
         <img src="https://ljku.edu.in/web/image/course.program/14/website_logo" height={30} width={400}></img>
       </nav>
 
-      {/* Main */}
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-md">
           <h2 className="text-3xl font-semibold text-center text-gray-800 mb-2">
@@ -52,7 +71,6 @@ export default function SignInPage() {
             Continue to placement portal
           </p>
 
-          {/* Role dropdown */}
           <div className="relative mb-4">
             <button
               type="button"
@@ -100,22 +118,25 @@ export default function SignInPage() {
             {errors.role && (
               <p className="text-sm text-red-500 mt-1">{errors.role}</p>
             )}
+            {errors.form && (
+              <p className="text-sm text-red-500 text-center">{errors.form}</p>
+            )}
+
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${errors.email
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${errors.username
                 ? "border-red-400 focus:ring-red-300"
                 : "border-gray-300 focus:ring-emerald-400"
                 }`}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
+            {errors.username && (
+              <p className="text-sm text-red-500">{errors.username}</p>
             )}
 
             <input
@@ -145,10 +166,7 @@ export default function SignInPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-4">
-        © {new Date().getFullYear()} XYZ College of Engineering. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }
