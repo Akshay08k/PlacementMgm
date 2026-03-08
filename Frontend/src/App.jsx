@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AuthProvider, { useAuth } from "./contexts/AuthContext";
+import { InstituteConfigProvider } from "./contexts/InstituteConfigContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import StudentLayout from "./layouts/StudentLayout";
@@ -15,7 +16,6 @@ import JobApplyPage from "./pages/JobApply";
 import ApplicationsPage from "./pages/Applications";
 import ProfilePage from "./pages/Profile";
 import ResumePage from "./pages/Resume";
-import CompanyCreatePage from "./pages/CompanyCreate";
 import StudentImportPage from "./pages/StudentImport";
 import ResourcesPage from "./pages/Resources";
 import InstituteSettingsPage from "./pages/InstituteSettings";
@@ -31,7 +31,8 @@ function AppRoutes() {
       : <DashboardLayout />;
 
   return (
-    <Routes>
+    <div className="flex flex-col min-h-screen">
+      <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -92,8 +93,9 @@ function AppRoutes() {
     
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
-          
-    </Routes>
+      </Routes>
+      <Footer />
+    </div>
   );
 }
 
@@ -101,7 +103,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <InstituteConfigProvider>
+          <AppRoutes />
+        </InstituteConfigProvider>
       </AuthProvider>
     </BrowserRouter>
   );

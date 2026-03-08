@@ -5,13 +5,14 @@ import { MdDashboard, MdNotifications, MdBusiness, MdAssignment, MdEventNote } f
 import { BiLogIn } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Footer from "./Footer";
+import { useInstituteConfig } from '../contexts/InstituteConfigContext';
 
 export default function LJUPlacementHomePage() {
     const [scrollY, setScrollY] = useState(0);
     const [isVisible, setIsVisible] = useState({});
     const navigate = useNavigate();
     const { user, role, isAuthenticated } = useAuth();
+    const { config: institute } = useInstituteConfig();
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -63,17 +64,18 @@ export default function LJUPlacementHomePage() {
                         { icon: <FaChartLine />, label: "Reports & Analytics", color: "from-orange-500 to-red-500" }
                     ],
                     stats: [
-                        { number: "1,245", label: "Total Students", icon: <FaGraduationCap /> },
-                        { number: "87", label: "Companies", icon: <FaBuilding /> },
+                        { number: institute?.students_count || "1,245", label: "Total Students", icon: <FaGraduationCap /> },
+                        { number: institute?.partner_companies || "87", label: "Companies", icon: <FaBuilding /> },
                         { number: "42", label: "Active Drives", icon: <MdEventNote /> },
-                        { number: "78%", label: "Placement Rate", icon: <FaCheckCircle /> }
+                        { number: institute?.placement_rate || "78%", label: "Placement Rate", icon: <FaCheckCircle /> }
                     ]
                 };
 
+                    
             case 'company':
                 return {
                     title: `Welcome, ${user?.username || 'Recruiter'}`,
-                    subtitle: "Post opportunities and find the best talent from LJ University",
+                    subtitle: `Post opportunities and find the best talent from ${institute?.name || 'LJ University'}`,
                     quickActions: [
                         { icon: <MdAssignment />, label: "Post Job", color: "from-green-500 to-emerald-500" },
                         { icon: <FaClipboardList />, label: "View Applications", color: "from-blue-500 to-cyan-500" },
@@ -81,10 +83,10 @@ export default function LJUPlacementHomePage() {
                         { icon: <FaUsers />, label: "Candidate Pool", color: "from-orange-500 to-red-500" }
                     ],
                     stats: [
-                        { number: user.activeJobs || "8", label: "Active Jobs", icon: <FaBriefcase /> },
-                        { number: user.applications || "156", label: "Applications", icon: <FaFileAlt /> },
-                        { number: user.shortlisted || "34", label: "Shortlisted", icon: <FaCheckCircle /> },
-                        { number: user.hired || "12", label: "Hired", icon: <FaUserTie /> }
+                        { number: user?.activeJobs || "8", label: "Active Jobs", icon: <FaBriefcase /> },
+                        { number: user?.applications || "156", label: "Applications", icon: <FaFileAlt /> },
+                        { number: user?.shortlisted || "34", label: "Shortlisted", icon: <FaCheckCircle /> },
+                        { number: user?.hired || "12", label: "Hired", icon: <FaUserTie /> }
                     ]
                 };
 
@@ -99,8 +101,8 @@ export default function LJUPlacementHomePage() {
                         { icon: <MdDashboard />, label: "Configuration", color: "from-orange-500 to-red-500" }
                     ],
                     stats: [
-                        { number: "1,245", label: "Students", icon: <FaGraduationCap /> },
-                        { number: "87", label: "Companies", icon: <FaBuilding /> },
+                        { number: institute?.students_count || "1,245", label: "Students", icon: <FaGraduationCap /> },
+                        { number: institute?.partner_companies || "87", label: "Companies", icon: <FaBuilding /> },
                         { number: "5", label: "TPO Staff", icon: <FaUserTie /> },
                         { number: "99.2%", label: "Uptime", icon: <FaCheckCircle /> }
                     ]
@@ -118,7 +120,7 @@ export default function LJUPlacementHomePage() {
     const roleBasedContent = isAuthenticated ? getRoleBasedContent() : null;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-mint-50 to-emerald-50 overflow-hidden">
+        <div className="min-h-screen bg-linear-to-br from-green-50 via-mint-50 to-emerald-50 overflow-hidden">
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
                 <div className="absolute top-40 right-10 w-72 h-72 bg-mint-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -129,7 +131,7 @@ export default function LJUPlacementHomePage() {
             {isAuthenticated ? (
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
                     <div className={`transform transition-all duration-1000 ${isVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-8 md:p-12 text-white shadow-2xl mb-8">
+                        <div className="bg-linear-to-r from-green-500 to-emerald-500 rounded-3xl p-8 md:p-12 text-white shadow-2xl mb-8">
                             <div className="flex items-center space-x-2 mb-4">
                                 <HiSparkles className="text-3xl" />
                                 <span className="text-sm font-semibold uppercase tracking-wide">Dashboard</span>
@@ -144,7 +146,7 @@ export default function LJUPlacementHomePage() {
                                 {roleBasedContent.quickActions.map((action, index) => (
                                     <button
                                         key={index}
-                                        className={`bg-gradient-to-r ${action.color} text-white p-6 rounded-2xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group`}
+                                        className={`bg-linear-to-r ${action.color} text-white p-6 rounded-2xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group`}
                                     >
                                         <div className="text-4xl mb-3 transform group-hover:scale-110 transition-transform">
                                             {action.icon}
@@ -197,7 +199,7 @@ export default function LJUPlacementHomePage() {
                                 <div className="space-y-3">
                                     {[1, 2, 3].map((item) => (
                                         <div key={item} className="flex items-start space-x-3 p-3 hover:bg-green-50 rounded-lg transition-colors">
-                                            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                            <div className="w-12 h-12 bg-linear-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold">
                                                 {10 + item}
                                             </div>
                                             <div className="flex-1">
@@ -217,24 +219,24 @@ export default function LJUPlacementHomePage() {
                         <div className={`text-center transform transition-all duration-1000 ${isVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full mb-6 animate-bounce-slow">
                                 <HiSparkles className="text-xl" />
-                                <span className="text-sm font-semibold">LJ University Placement Cell</span>
+                                <span className="text-sm font-semibold">{institute?.name || 'LJ University'} Placement Cell</span>
                             </div>
 
                             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-10">
                                 Shape Your Future at
-                                <span className="block bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent animate-gradient p-2">
-                                    LJ University
+                                <span className="block bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent animate-gradient p-2">
+                                    {institute?.name || 'LJ University'}
                                 </span>
                             </h1>
 
                             <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-                                Connecting LJ University's brightest minds with leading companies. Your journey to a successful career starts here.
+                                Connecting {institute?.name || "LJ University"}'s brightest minds with leading companies. Your journey to a successful career starts here.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <button
                                     onClick={() => navigate('/signin')}
-                                    className="group bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
+                                    className="group bg-linear-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
                                 >
                                     <span>Student Login</span>
                                     <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -243,17 +245,17 @@ export default function LJUPlacementHomePage() {
                                     onClick={() => navigate('/signin')}
                                     className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold border-2 border-green-500 hover:bg-green-50 transform hover:scale-105 transition-all duration-300"
                                 >
-                                    Recruiter / TPO / Admin Login
+                                    Recruiter / TPO  Login
                                 </button>
                             </div>
                         </div>
 
                         <div className={`mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 transform transition-all duration-1000 delay-300 ${isVisible.stats ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             {[
-                                { number: "1200+", label: "Students", icon: <FaGraduationCap /> },
-                                { number: "85+", label: "Partner Companies", icon: <FaBuilding /> },
-                                { number: "90%", label: "Placement Rate", icon: <FaCheckCircle /> },
-                                { number: "500+", label: "Opportunities", icon: <FaBriefcase /> }
+                                { number: institute?.students_count || "1200+", label: "Students", icon: <FaGraduationCap /> },
+                                { number: institute?.partner_companies || "85+", label: "Partner Companies", icon: <FaBuilding /> },
+                                { number: institute?.placement_rate || "90%", label: "Placement Rate", icon: <FaCheckCircle /> },
+                                { number: institute?.opportunities || "500+", label: "Opportunities", icon: <FaBriefcase /> }
                             ].map((stat, index) => (
                                 <div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center hover:shadow-xl transform hover:scale-105 transition-all duration-300 group">
                                     <div className="text-green-500 text-3xl mb-2 flex justify-center group-hover:scale-110 transition-transform">
@@ -307,7 +309,7 @@ export default function LJUPlacementHomePage() {
                                     key={index}
                                     className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border border-green-100 hover:border-green-300"
                                 >
-                                    <div className={`text-transparent bg-gradient-to-r ${card.color} bg-clip-text mb-4 transform group-hover:scale-110 transition-all duration-300`}>
+                                    <div className={`text-transparent bg-linear-to-r ${card.color} bg-clip-text mb-4 transform group-hover:scale-110 transition-all duration-300`}>
                                         <card.icon className='text-green-500 text-3xl mb-2 flex justify-center' />
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
@@ -318,9 +320,9 @@ export default function LJUPlacementHomePage() {
                     </section>
 
                     <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-12 text-center text-white shadow-2xl transform hover:scale-105 transition-all duration-300">
+                        <div className="bg-linear-to-r from-green-500 to-emerald-500 rounded-3xl p-12 text-center text-white shadow-2xl transform hover:scale-105 transition-all duration-300">
                             <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Get Started?</h2>
-                            <p className="text-xl mb-8 opacity-90">Join the LJ University Placement Portal today</p>
+                            <p className="text-xl mb-8 opacity-90">Join the {institute?.name || 'LJ University'} Placement Portal today</p>
                             <button
                                 onClick={() => navigate('/signin')}
                                 className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2"
@@ -333,7 +335,6 @@ export default function LJUPlacementHomePage() {
                 </>
             )}
 
-            <Footer/>
 
             <style jsx>{`
         @keyframes blob {

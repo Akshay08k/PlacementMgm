@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FaUserGraduate, FaBuilding, FaUserTie, FaUserShield } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Footer from "./Footer";
 
 export default function SignInPage() {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -165,8 +164,6 @@ export default function SignInPage() {
           </form>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

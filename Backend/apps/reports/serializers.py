@@ -17,6 +17,8 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 
 class InstituteConfigSerializer(serializers.ModelSerializer):
+    logo_url = serializers.URLField(required=False, allow_blank=True)
+
     class Meta:
         model = InstituteConfig
         fields = [
@@ -27,6 +29,13 @@ class InstituteConfigSerializer(serializers.ModelSerializer):
             "support_email",
             "placement_email",
             "primary_color",
+            "students_count",
+            "students_every_year",
+            "partner_companies",
+            "placement_rate",
+            "opportunities",
+            "address",
+            "contact_phone",
         ]
 
 

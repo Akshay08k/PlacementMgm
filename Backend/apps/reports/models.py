@@ -34,7 +34,7 @@ class Resource(models.Model):
 class InstituteConfig(models.Model):
     """
     Global institute/college configuration for the SaaS instance.
-    First TPO/Admin can configure this from the dashboard.
+    TPO/Admin can configure this from the Institute Management page.
     """
 
     name = models.CharField(max_length=200, default="Your Institute Name")
@@ -46,6 +46,42 @@ class InstituteConfig(models.Model):
         max_length=20,
         blank=True,
         help_text="Optional primary color (hex or Tailwind token)",
+    )
+    # Stats displayed on homepage and across the site
+    students_count = models.CharField(
+        max_length=50,
+        default="1200+",
+        help_text="Total students (e.g. 1200+)",
+    )
+    students_every_year = models.CharField(
+        max_length=50,
+        default="300+",
+        help_text="Students graduating every year (e.g. 300+)",
+    )
+    partner_companies = models.CharField(
+        max_length=50,
+        default="85+",
+        help_text="Partner companies count (e.g. 85+)",
+    )
+    placement_rate = models.CharField(
+        max_length=50,
+        default="90%",
+        help_text="Placement rate (e.g. 90%)",
+    )
+    opportunities = models.CharField(
+        max_length=50,
+        default="500+",
+        help_text="Total opportunities (e.g. 500+)",
+    )
+    address = models.CharField(
+        max_length=300,
+        blank=True,
+        help_text="Institute address for footer",
+    )
+    contact_phone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Contact phone for footer",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
