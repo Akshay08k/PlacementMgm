@@ -1,9 +1,12 @@
+import logging
 from datetime import date
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from apps.accounts.permissions import IsTPOOrAdmin
+
+logger = logging.getLogger(__name__)
 from apps.students.models import StudentProfile
 from apps.companies.models import CompanyProfile, Job
 from apps.applications.models import Application
@@ -16,23 +19,33 @@ class AdminDashboardStats(APIView):
     permission_classes = [permissions.IsAuthenticated, IsTPOOrAdmin]
 
     def get(self, request):
-        students_total = StudentProfile.objects.count()
-        students_placed = StudentProfile.objects.filter(
-            placement_status=StudentProfile.PlacementStatus.PLACED
-        ).count()
-        companies_total = CompanyProfile.objects.count()
-        jobs_pending = Job.objects.filter(status=Job.Status.PENDING).count()
-        jobs_approved = Job.objects.filter(status=Job.Status.APPROVED).count()
-        applications_total = Application.objects.count()
-        drives_upcoming = Drive.objects.filter(drive_date__gte=date.today()).count()
-        placement_rate = (
-            round(100 * students_placed / students_total, 1) if students_total else 0
-        )
+        try:
+            students_total = StudentProfile.objects.count()
+            students_placed = StudentProfile.objects.filter(
+                placement_status=StudentProfile.PlacementStatus.PLACED
+            ).count()
+            companies_total = CompanyProfile.objects.count()
+            jobs_pending = Job.objects.filter(status=Job.Status.PENDING).count()
+            jobs_approved = Job.objects.filter(status=Job.Status.APPROVED).count()
+            applications_total = Application.objects.count()
+            drives_upcoming = Drive.objects.filter(drive_date__gte=date.today()).count()
+            placement_rate = (
+                round(100 * students_placed / students_total, 1) if students_total else 0
+            )
+        except Exception as e:
+            logger.exception("AdminDashboardStats: error fetching stats")
+            return Response(
+                {"detail": str(e)},
+                status=500,
+            )
 
-        config = InstituteConfig.objects.first()
-        config_data = (
-            InstituteConfigSerializer(config).data if config else None
-        )
+        config_data = None
+        try:
+            config = InstituteConfig.objects.first()
+            if config:
+                config_data = InstituteConfigSerializer(config).data
+        except Exception as e:
+            logger.exception("AdminDashboardStats: error serializing institute config")
 
         return Response(
             {
@@ -97,4 +110,40 @@ class InstituteConfigView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class InstituteConfigPublicView(APIView):
+    """
+    Public read-only endpoint for institute configuration.
+    Used by homepage and other public pages (no auth required).
+    """
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # No auth required - skip JWT to avoid 500 on invalid/missing token
+
+    def get(self, request):
+        try:
+            obj, _ = InstituteConfig.objects.get_or_create(id=1)
+            data = InstituteConfigSerializer(obj).data
+            return Response(data)
+        except Exception as e:
+            logger.exception("InstituteConfigPublicView: error")
+            # Return sensible defaults so frontend never breaks
+            return Response(
+                {
+                    "name": "Your Institute Name",
+                    "short_name": "",
+                    "logo_url": "",
+                    "support_email": "",
+                    "placement_email": "",
+                    "primary_color": "",
+                    "students_count": "1200+",
+                    "students_every_year": "300+",
+                    "partner_companies": "85+",
+                    "placement_rate": "90%",
+                    "opportunities": "500+",
+                    "address": "",
+                    "contact_phone": "",
+                }
+            )
 

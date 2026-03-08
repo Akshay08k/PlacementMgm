@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import { useInstituteConfig } from "../contexts/InstituteConfigContext"
 import { MdMenu, MdClose, MdDashboard } from "react-icons/md"
 import { FaUserCircle } from "react-icons/fa"
 import { BiLogOut } from "react-icons/bi"
@@ -43,6 +44,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, role, isAuthenticated, logOut } = useAuth()
+  const { config: institute } = useInstituteConfig()
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenu, setUserMenu] = useState(false)
@@ -75,11 +77,19 @@ export default function Navbar() {
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 font-semibold text-gray-900"
           >
-            <img
-              src="https://ljku.edu.in/web/image/course.program/14/website_logo"
-              alt="logo"
-              className="h-8"
-            />
+            {institute?.logo_url ? (
+              <img
+                src={institute.logo_url}
+                alt="logo"
+                className="h-8"
+              />
+            ) : (
+              <img
+                src="https://ljku.edu.in/web/image/course.program/14/website_logo"
+                alt="logo"
+                className="h-8"
+              />
+            )}
             <span className="hidden sm:block">Placement Portal</span>
           </button>
 

@@ -4,9 +4,11 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("student");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
   const { loginAction, isAuthenticated, role, mustChangePassword } = useAuth();
 
@@ -21,13 +23,19 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newErrors = {};
     if (!email) newErrors.email = "Email is required";
     if (!password) newErrors.password = "Password is required";
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
+
+    setIsLoading(true);
+
     try {
       await loginAction({ email, password });
+
       if (mustChangePassword && role === "company") {
         navigate("/change-password", { replace: true });
       } else {
@@ -37,77 +45,159 @@ export default function LoginPage() {
       setErrors({
         form: err.response?.data?.detail || "Login failed. Check your credentials.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-linear-to-br from-slate-50 via-emerald-50/30 to-slate-100">
-      <nav className="px-6 py-4 border-b border-slate-200/80 bg-white/70 backdrop-blur">
-        <h1 className="text-xl font-semibold text-emerald-800">Placement Management System</h1>
+    <div className="min-h-screen flex flex-col bg-[#f8faf8] relative overflow-hidden font-sans">
+
+      <nav className="flex items-center gap-2 px-8 py-5 relative z-10">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-linear-to-br from-emerald-600 to-emerald-400 shadow-md">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span className="text-sm font-semibold text-emerald-900">
+          Placement Management System
+        </span>
       </nav>
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100">
-            <h2 className="text-2xl font-bold text-slate-800 mb-1">Sign in</h2>
-            <p className="text-slate-500 text-sm mb-6">Enter your credentials to continue</p>
+
+      <main className="flex flex-1 items-center justify-center px-4 pb-12 relative z-10">
+
+        <div className="w-full max-w-md animate-[fadeUp_.5s_ease]">
+
+          <div className="h-1 bg-linear-to-r from-emerald-600 via-emerald-400 to-emerald-300 rounded-t-2xl" />
+
+          <div className="bg-white rounded-b-2xl p-9 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06),0_20px_40px_rgba(0,0,0,0.05)] border border-black/5 border-t-0">
+
+            <h2 className="text-3xl font-serif text-[#0a2e1e] mb-1">
+              Welcome back
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-7">
+              Sign in to your account to continue
+            </p>
+
+            <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg mb-5">
+
+              {["student", "tpo", "company"].map((r) => {
+
+                const active = selectedRole === r;
+
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setSelectedRole(r)}
+                    className={`py-2 text-sm rounded-md transition
+                      ${active
+                        ? "bg-white text-emerald-800 font-semibold shadow"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
+                      }`}
+                  >
+                    {r === "tpo"
+                      ? "TPO"
+                      : r.charAt(0).toUpperCase() + r.slice(1)}
+                  </button>
+                );
+              })}
+
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
-                    errors.role ? "border-red-400" : "border-slate-300"
-                  }`}
-                >
-                  <option value="student">Student</option>
-                  <option value="tpo">TPO</option>
-                  <option value="company">Company</option>
-                </select>
-                {errors.role && <p className="text-sm text-red-500 mt-1">{errors.role}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
+                  Email
+                </label>
+
                 <input
                   type="email"
                   placeholder="you@example.com"
                   value={email}
+                  autoComplete="email"
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
-                    errors.email ? "border-red-400" : "border-slate-300"
-                  }`}
+                  className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-gray-50 outline-none transition
+                    ${errors.email
+                      ? "border-red-400 bg-red-50"
+                      : "border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                    }`}
                 />
-                {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1">
+                    ⚠ {errors.email}
+                  </p>
+                )}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
+                  Password
+                </label>
+
                 <input
                   type="password"
                   placeholder="••••••••"
                   value={password}
+                  autoComplete="current-password"
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
-                    errors.password ? "border-red-400" : "border-slate-300"
-                  }`}
+                  className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-gray-50 outline-none transition
+                    ${errors.password
+                      ? "border-red-400 bg-red-50"
+                      : "border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                    }`}
                 />
-                {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    ⚠ {errors.password}
+                  </p>
+                )}
               </div>
+
               {errors.form && (
-                <p className="text-sm text-red-500 text-center">{errors.form}</p>
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md py-2 px-3 text-center">
+                  {errors.form}
+                </div>
               )}
-              <button
+                <button
                 type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition"
+                disabled={isLoading}
+                className="w-full mt-2 py-3 rounded-lg text-white font-semibold bg-linear-to-br from-emerald-600 to-emerald-500 shadow-lg hover:-translate-y-px hover:shadow-xl transition disabled:opacity-70"
               >
-                Sign in
+                <span className="flex items-center justify-center gap-2">
+
+                  {isLoading && (
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>
+                  )}
+
+                  {isLoading ? "Signing in…" : "Sign in"}
+                </span>
               </button>
+
             </form>
-            <p className="text-xs text-slate-500 mt-4 text-center">
-              Students, TPOs, Recruiters and Admins all use this login. Just enter your registered email and password.
-            </p>
-            <p className="text-center text-slate-500 text-sm mt-4">
-              Student? <a href="/register" className="text-emerald-600 hover:underline">Register here</a>
-            </p>
+
+            <div className="mt-6 pt-5 border-t flex flex-col items-center gap-2">
+
+              <p className="text-xs text-gray-400 text-center">
+                Students, TPOs, Recruiters & Admins all use this login.
+              </p>
+
+              <p className="text-sm text-gray-500">
+                New student?{" "}
+                <a
+                  href="/register"
+                  className="text-emerald-600 font-semibold border-b border-transparent hover:border-emerald-600"
+                >
+                  Register here
+                </a>
+              </p>
+
+            </div>
+
           </div>
         </div>
       </main>

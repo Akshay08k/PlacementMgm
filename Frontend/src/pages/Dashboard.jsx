@@ -82,6 +82,7 @@ export default function DashboardPage() {
   const [studentSummary, setStudentSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [companyCreatePopup, setCompanyCreatePopup] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
 
   
@@ -123,8 +124,20 @@ export default function DashboardPage() {
         .finally(() => { if (!cancelled) setLoading(false); });
     } else if (role === "tpo" || role === "admin") {
       axios.get("/reports/admin-dashboard/")
-        .then((r) => { if (!cancelled) setStats(r.data); })
-        .catch(() => {})
+        .then((r) => {
+          if (!cancelled) {
+            setStats(r.data);
+            setLoadError(null);
+          }
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setStats(null);
+            setLoadError(err?.response?.status === 500
+              ? "Server error loading dashboard. Please restart the backend and try again."
+              : "Failed to load dashboard data.");
+          }
+        })
         .finally(() => { if (!cancelled) setLoading(false); });
     } else {
       setLoading(false);
@@ -134,6 +147,31 @@ export default function DashboardPage() {
   }, [role]);
 
   if (loading) return <div className="text-slate-500">Loading…</div>;
+
+  if (loadError && (role === "tpo" || role === "admin")) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-slate-800">{role === "admin" ? "Admin" : "TPO"} Dashboard</h1>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800">
+          <p className="font-medium">{loadError}</p>
+          <p className="text-sm mt-1">Ensure migrations are applied: <code className="bg-amber-100 px-1 rounded">python manage.py migrate</code></p>
+          <button
+            onClick={() => {
+              setLoadError(null);
+              setLoading(true);
+              axios.get("/reports/admin-dashboard/")
+                .then((r) => { setStats(r.data); setLoadError(null); })
+                .catch(() => setLoadError("Still unable to load. Check backend is running."))
+                .finally(() => setLoading(false));
+            }}
+            className="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (role === "student") {
     const s = studentSummary;
