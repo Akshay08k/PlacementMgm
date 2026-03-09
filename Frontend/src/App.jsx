@@ -9,6 +9,8 @@ import HomePage from "./pages/Home";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import ChangePasswordPage from "./pages/ChangePassword";
+import ForgotPasswordPage from "./pages/ForgotPassword";
+import ResetPasswordPage from "./pages/ResetPassword";
 import DashboardPage from "./pages/Dashboard";
 import JobsPage from "./pages/Jobs";
 import JobCreatePage from "./pages/JobCreate";
@@ -37,6 +39,8 @@ function AppRoutes() {
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/change-password" element={<ChangePasswordPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/"
         element={

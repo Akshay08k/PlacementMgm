@@ -3,8 +3,9 @@ Cloudinary file upload and resume PDF generation.
 """
 import io
 from django.http import HttpResponse
+from django.conf import settings as django_settings
 from rest_framework import permissions, status
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from reportlab.lib.pagesizes import A4
@@ -16,9 +17,35 @@ from apps.accounts.permissions import IsStudent
 from apps.students.models import StudentProfile
 
 
+def configure_cloudinary():
+    """
+    Configure Cloudinary using env-backed Django settings.
+    Returns True when configuration is present and applied.
+    """
+    cloud_name = getattr(django_settings, "CLOUDINARY_CLOUD_NAME", "") or ""
+    api_key = getattr(django_settings, "CLOUDINARY_API_KEY", "") or ""
+    api_secret = getattr(django_settings, "CLOUDINARY_API_SECRET", "") or ""
+    if not (cloud_name and api_key and api_secret):
+        return False
+    try:
+        import cloudinary
+
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=api_key,
+            api_secret=api_secret,
+            secure=True,
+        )
+        return True
+    except Exception:
+        return False
+
+
 def get_cloudinary_upload():
     try:
         import cloudinary.uploader
+        if not configure_cloudinary():
+            return None
         return cloudinary.uploader.upload
     except ImportError:
         return None
@@ -27,7 +54,7 @@ def get_cloudinary_upload():
 class UploadResumeView(APIView):
     """Student uploads resume file; returns Cloudinary URL."""
     permission_classes = [permissions.IsAuthenticated, IsStudent]
-    parser_classes = [FileUploadParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
         file = request.FILES.get("file")
@@ -43,7 +70,13 @@ class UploadResumeView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         try:
-            result = upload(file, resource_type="raw")
+            result = upload(
+                file,
+                resource_type="raw",
+                folder="placement_portal/resumes",
+                use_filename=True,
+                unique_filename=True,
+            )
             url = result.get("secure_url") or result.get("url")
             if not url:
                 return Response({"error": "Upload failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
