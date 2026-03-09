@@ -9,11 +9,15 @@ import HomePage from "./pages/Home";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import ChangePasswordPage from "./pages/ChangePassword";
+import ForgotPasswordPage from "./pages/ForgotPassword";
+import ResetPasswordPage from "./pages/ResetPassword";
 import DashboardPage from "./pages/Dashboard";
 import JobsPage from "./pages/Jobs";
 import JobCreatePage from "./pages/JobCreate";
 import JobApplyPage from "./pages/JobApply";
+import JobDetailPage from "./pages/JobDetail";
 import ApplicationsPage from "./pages/Applications";
+import ApplicationDetailPage from "./pages/ApplicationDetail";
 import ProfilePage from "./pages/Profile";
 import ResumePage from "./pages/Resume";
 import StudentImportPage from "./pages/StudentImport";
@@ -37,6 +41,8 @@ function AppRoutes() {
       <Route path="/signin" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/change-password" element={<ChangePasswordPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/"
         element={
@@ -48,8 +54,10 @@ function AppRoutes() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/create" element={<JobCreatePage />} />
+        <Route path="jobs/:id" element={<JobDetailPage />} />
         <Route path="jobs/:id/apply" element={<JobApplyPage />} />
         <Route path="applications" element={<ApplicationsPage />} />
+        <Route path="applications/:id" element={<ApplicationDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="resume" element={<ResumePage />} />
         <Route path="resources" element={<ResourcesPage />} />

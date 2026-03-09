@@ -31,6 +31,19 @@ instance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // If we're sending FormData (file upload), don't force JSON content-type.
+        // Axios/Vite will set the correct multipart boundary automatically.
+        if (typeof FormData !== "undefined" && config?.data instanceof FormData) {
+            try {
+                if (config.headers?.set) {
+                    config.headers.delete?.("Content-Type");
+                } else if (config.headers) {
+                    delete config.headers["Content-Type"];
+                    delete config.headers["content-type"];
+                }
+            } catch (_) {}
+        }
+
         return config;
     },
     (error) => Promise.reject(error)

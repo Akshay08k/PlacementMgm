@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.applications",
     "apps.reports",
     "apps.notifications",
+    "django_extensions"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -176,6 +177,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@placement.local")
+
+# Frontend base URL used in email links (password reset, invites, etc.)
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")

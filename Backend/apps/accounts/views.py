@@ -1,3 +1,9 @@
+from django.conf import settings
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
@@ -10,10 +16,14 @@ from .serializers import (
     CompanyCreateByTPOSerializer,
     CustomTokenObtainPairSerializer,
     LogoutSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     TPOCreateSerializer,
     StudentRegisterSerializer,
     UserSerializer,
 )
+
+User = get_user_model()
 
 
 class StudentRegisterAPIView(generics.CreateAPIView):
@@ -113,3 +123,58 @@ class LogoutAPIView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(status=status.HTTP_205_RESET_CONTENT)
+
+
+class PasswordResetRequestAPIView(generics.GenericAPIView):
+    """
+    Forgot password: request a reset link via email.
+    Always returns 200 to avoid user enumeration.
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PasswordResetRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].strip().lower()
+
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_link = f"{getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:5173')}/reset-password?uid={uid}&token={token}"
+            subject = "Password reset request"
+            message = (
+                "You requested a password reset.\n\n"
+                f"Reset your password using this link:\n{reset_link}\n\n"
+                "If you did not request this, you can ignore this email."
+            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@placement.local"),
+                    [user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
+        return Response(
+            {"detail": "If that email exists, a reset link has been sent."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmAPIView(generics.GenericAPIView):
+    """
+    Reset password using uid + token from email link.
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PasswordResetConfirmSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Password reset successful."}, status=status.HTTP_200_OK)

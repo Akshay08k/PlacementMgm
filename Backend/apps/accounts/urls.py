@@ -7,6 +7,8 @@ from .views import (
     CustomTokenObtainPairView,
     LogoutAPIView,
     MeAPIView,
+  PasswordResetConfirmAPIView,
+  PasswordResetRequestAPIView,
     StudentRegisterAPIView,
     TPOCreateAPIView,
 )
@@ -20,4 +22,6 @@ urlpatterns = [
     path("logout/", LogoutAPIView.as_view(), name="logout"),
     path("me/", MeAPIView.as_view(), name="me"),
     path("change-password/", ChangePasswordAPIView.as_view(), name="change-password"),
+    path("password-reset/request/", PasswordResetRequestAPIView.as_view(), name="password-reset-request"),
+    path("password-reset/confirm/", PasswordResetConfirmAPIView.as_view(), name="password-reset-confirm"),
 ]

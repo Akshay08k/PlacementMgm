@@ -1,4 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_str
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -270,3 +274,44 @@ class LogoutSerializer(serializers.Serializer):
         refresh_token = self.validated_data["refresh"]
         token = RefreshToken(refresh_token)
         token.blacklist()
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
+
+    def validate(self, attrs):
+        uid = attrs.get("uid")
+        token = attrs.get("token")
+        try:
+            user_id = force_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(pk=user_id)
+        except Exception:
+            raise serializers.ValidationError("Invalid reset link.")
+
+        if not default_token_generator.check_token(user, token):
+            raise serializers.ValidationError("Reset link expired or invalid.")
+
+        attrs["user"] = user
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.validated_data["user"]
+        new_password = self.validated_data["new_password"]
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+        # If company was forced to change password, clear that flag too
+        if getattr(user, "is_company", False) and hasattr(user, "company_profile"):
+            user.company_profile.must_change_password = False
+            user.company_profile.invite_token = None
+            user.company_profile.save(update_fields=["must_change_password", "invite_token"])
+        return user

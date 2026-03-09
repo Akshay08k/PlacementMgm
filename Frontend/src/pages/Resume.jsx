@@ -217,6 +217,7 @@ export default function ResumePage() {
     location: "", date_of_birth: "", gender: "", current_address: "",
     permanent_address: "", passing_year: "", marks_10th: "", marks_12th: "",
     current_cgpa: "", skills: "", education_history: "",
+    resume_url: "",
   });
 
   if (role !== "student") {
@@ -262,7 +263,14 @@ export default function ResumePage() {
     const fd = new FormData();
     fd.append("file", file);
     try {
-      await axios.post("/students/upload-resume/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await axios.post("/students/upload-resume/", fd, {
+        timeout: 60000,
+        // Let axios set multipart boundary automatically
+      });
+      const url = res?.data?.resume_url || res?.data?.url;
+      if (url) {
+        setForm((prev) => ({ ...prev, resume_url: url }));
+      }
       notify("Resume uploaded and linked to your profile.", "success");
     } catch (err) {
       notify(err.response?.data?.error || "Upload failed.", "error");
@@ -512,21 +520,33 @@ export default function ResumePage() {
               <button type="button" onClick={() => setStep(1)} className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm">Edit Details</button>
             </div>
           </div>
-
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="font-semibold text-slate-800 mb-1">Or Upload Your Own Resume</h2>
-            <p className="text-slate-500 text-sm mb-3">PDF or Word document. Stored and linked to your profile.</p>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleFile}
-              disabled={uploading}
-              className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100"
-            />
-            {uploading && <p className="text-sm mt-2 text-slate-500">Uploading…</p>}
-          </div>
         </div>
       )}
+
+      <div className="max-w-3xl mt-6">
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="font-semibold text-slate-800 mb-1">Upload Your Resume</h2>
+          <p className="text-slate-500 text-sm mb-3">PDF or Word document. Stored in Cloudinary and linked to your profile.</p>
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx"
+            onChange={handleFile}
+            disabled={uploading}
+            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100"
+          />
+          {uploading && <p className="text-sm mt-2 text-slate-500">Uploading…</p>}
+          {form.resume_url && (
+            <a
+              href={form.resume_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex mt-3 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+            >
+              View uploaded resume
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

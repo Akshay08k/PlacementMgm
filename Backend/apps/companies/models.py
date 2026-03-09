@@ -35,6 +35,11 @@ class Job(models.Model):
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
 
+    class HiringFlow(models.TextChoices):
+        APPLICATION_REVIEW = "applications", "Application review (shortlist & rounds)"
+        DRIVE = "drive", "Drive (schedule campus drive)"
+        BOTH = "both", "Both (drive + application review)"
+
     company = models.ForeignKey(
         CompanyProfile,
         on_delete=models.CASCADE,
@@ -54,6 +59,17 @@ class Job(models.Model):
     skills_required = models.TextField(blank=True, help_text="Comma-separated")
     num_vacancies = models.PositiveIntegerField(default=1)
     jd_pdf_url = models.URLField(max_length=500, blank=True, help_text="Cloudinary URL")
+    hiring_flow = models.CharField(
+        max_length=20,
+        choices=HiringFlow.choices,
+        default=HiringFlow.APPLICATION_REVIEW,
+        help_text="How the company wants to process applications for this job",
+    )
+    interview_rounds = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Ordered list of interview round keys (e.g. ['resume_shortlist','technical','hr','final'])",
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
