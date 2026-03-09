@@ -53,12 +53,22 @@ class JobSerializer(serializers.ModelSerializer):
             "skills_required",
             "num_vacancies",
             "jd_pdf_url",
+            "hiring_flow",
+            "interview_rounds",
             "status",
             "rejection_feedback",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["status", "rejection_feedback", "approved_at", "approved_by", "created_at", "updated_at"]
+        read_only_fields = [
+            "company",
+            "status",
+            "rejection_feedback",
+            "approved_at",
+            "approved_by",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -75,6 +85,8 @@ class JobListSerializer(serializers.ModelSerializer):
             "min_cgpa",
             "status",
             "num_vacancies",
+            "hiring_flow",
+            "interview_rounds",
             "created_at",
         ]
 

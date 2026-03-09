@@ -15,7 +15,9 @@ import DashboardPage from "./pages/Dashboard";
 import JobsPage from "./pages/Jobs";
 import JobCreatePage from "./pages/JobCreate";
 import JobApplyPage from "./pages/JobApply";
+import JobDetailPage from "./pages/JobDetail";
 import ApplicationsPage from "./pages/Applications";
+import ApplicationDetailPage from "./pages/ApplicationDetail";
 import ProfilePage from "./pages/Profile";
 import ResumePage from "./pages/Resume";
 import StudentImportPage from "./pages/StudentImport";
@@ -52,8 +54,10 @@ function AppRoutes() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/create" element={<JobCreatePage />} />
+        <Route path="jobs/:id" element={<JobDetailPage />} />
         <Route path="jobs/:id/apply" element={<JobApplyPage />} />
         <Route path="applications" element={<ApplicationsPage />} />
+        <Route path="applications/:id" element={<ApplicationDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="resume" element={<ResumePage />} />
         <Route path="resources" element={<ResourcesPage />} />

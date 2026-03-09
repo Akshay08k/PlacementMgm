@@ -45,4 +45,12 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        return Application.objects.create(student=self.context["student"], **validated_data)
+        job = validated_data["job"]
+        # If job has configured interview rounds, start from the first one.
+        rounds = getattr(job, "interview_rounds", None) or []
+        first_round = rounds[0] if rounds else Application.InterviewRound.RESUME_SHORTLIST
+        return Application.objects.create(
+            student=self.context["student"],
+            current_round=first_round,
+            **validated_data,
+        )
