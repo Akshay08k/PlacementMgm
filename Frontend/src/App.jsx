@@ -24,7 +24,10 @@ import StudentImportPage from "./pages/StudentImport";
 import ResourcesPage from "./pages/Resources";
 import InstituteSettingsPage from "./pages/InstituteSettings";
 import AdminStudentsPage from "./pages/AdminStudents";
+import DrivesPage from "./pages/Drives";
+import DriveDetailPage from "./pages/DriveDetail";
 import AdminCompaniesPage from "./pages/AdminCompanies";
+import AdminResourcesPage from "./pages/AdminResources";
 import Footer from "./components/Footer";
 
 function AppRoutes() {
@@ -62,10 +65,8 @@ function AppRoutes() {
         <Route path="resume" element={<ResumePage />} />
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="settings/institute" element={<InstituteSettingsPage />} />
-        <Route
-          path="drives"
-          element={<div className="text-slate-600">Drives list – use API /api/drives/</div>}
-        />
+        <Route path="drives" element={<DrivesPage />} />
+        <Route path="drives/:id" element={<DriveDetailPage />} />
         <Route
           path="reports"
           element={
@@ -95,6 +96,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["tpo", "admin"]}>
               <AdminCompaniesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin-resources"
+          element={
+            <ProtectedRoute allowedRoles={["tpo", "admin"]}>
+              <AdminResourcesPage />
             </ProtectedRoute>
           }
         />

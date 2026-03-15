@@ -9,7 +9,7 @@ from .views import (
     StudentProfileMe,
     TriggerStudentVerificationEmails,
 )
-from .upload_views import GenerateResumePDFView, UploadResumeView
+from .upload_views import GenerateResumePDFView, UploadResumeView, UploadProfilePictureView
 
 urlpatterns = [
     path("departments/", DepartmentListCreate.as_view()),
@@ -19,6 +19,7 @@ urlpatterns = [
     path("trigger-verification-emails/", TriggerStudentVerificationEmails.as_view()),
     path("me/", StudentProfileMe.as_view(), name="student-me"),
     path("upload-resume/", UploadResumeView.as_view()),
+    path("upload-avatar/", UploadProfilePictureView.as_view()),
     path("generate-resume-pdf/", GenerateResumePDFView.as_view()),
     path("<int:pk>/", StudentProfileDetail.as_view()),
     path("<int:pk>/ban/", StudentBanAPIView.as_view()),

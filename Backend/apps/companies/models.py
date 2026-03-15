@@ -18,6 +18,9 @@ class CompanyProfile(models.Model):
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=20, blank=True)
     industry = models.CharField(max_length=100, blank=True)
+    established_year = models.PositiveIntegerField(null=True, blank=True)
+    specialities = models.TextField(blank=True, help_text="Comma-separated or line-separated specialities")
+    client_images = models.JSONField(default=list, blank=True, help_text="List of Cloudinary image URLs")
     address = models.TextField(blank=True)
     must_change_password = models.BooleanField(default=True)
     invite_token = models.CharField(max_length=64, unique=True, null=True, blank=True)
@@ -52,6 +55,18 @@ class Job(models.Model):
     eligibility_criteria = models.TextField(blank=True)
     min_cgpa = models.DecimalField(
         max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    min_10th_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    min_12th_percent = models.DecimalField(
+        max_digits=5,
         decimal_places=2,
         null=True,
         blank=True,

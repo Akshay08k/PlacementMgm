@@ -22,6 +22,7 @@ const navAdmin = [
   { to: "/students", label: "Students" },
   { to: "/companies", label: "Companies" },
   { to: "/jobs", label: "Jobs" },
+  { to: "/admin-resources", label: "Resources" },
   { to: "/reports", label: "Reports" },
 ];
 

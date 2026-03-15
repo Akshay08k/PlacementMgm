@@ -17,6 +17,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "status",
             "current_round",
             "round_notes",
+            "attended",
             "applied_at",
             "updated_at",
         ]
@@ -49,8 +50,20 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         # If job has configured interview rounds, start from the first one.
         rounds = getattr(job, "interview_rounds", None) or []
         first_round = rounds[0] if rounds else Application.InterviewRound.RESUME_SHORTLIST
-        return Application.objects.create(
+        
+        application = Application.objects.create(
             student=self.context["student"],
             current_round=first_round,
             **validated_data,
         )
+
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            user=job.company.user,
+            kind=Notification.Kind.APPLICATION_UPDATE,
+            title="New Application Received",
+            message=f"{self.context['student'].user.get_full_name()} has applied for {job.title}.",
+            link=f"/applications/{application.id}"
+        )
+
+        return application

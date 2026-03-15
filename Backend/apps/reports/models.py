@@ -8,9 +8,19 @@ class Resource(models.Model):
         COMPANY = "company", "Company / Recruiter"
         ALL = "all", "All"
 
+    class ResourceType(models.TextChoices):
+        LINK = "link", "Direct Link"
+        PDF = "pdf", "PDF Document"
+        FILE = "file", "Other File"
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     link = models.URLField(max_length=500, help_text="URL to site, document or PDF")
+    resource_type = models.CharField(
+        max_length=20,
+        choices=ResourceType.choices,
+        default=ResourceType.LINK,
+    )
     audience = models.CharField(
         max_length=20,
         choices=Audience.choices,

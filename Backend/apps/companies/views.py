@@ -53,7 +53,21 @@ class JobListCreate(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if self.request.user.is_company:
-            serializer.save(company=self.request.user.company_profile)
+            job = serializer.save(company=self.request.user.company_profile)
+            from apps.accounts.models import User
+            from apps.notifications.models import Notification
+            
+            tpo_users = User.objects.filter(role=User.Role.TPO)
+            for tpo in tpo_users:
+                Notification.objects.create(
+                    user=tpo,
+                    kind=Notification.Kind.JOB_APPROVAL,
+                    title="New Job Pending Approval",
+                    message=f"{job.company.name} posted a new job: {job.title}.",
+                    link=f"/jobs/{job.id}"
+                )
+        else:
+            serializer.save()
 
 
 class JobDetail(generics.RetrieveUpdateAPIView):
@@ -89,6 +103,18 @@ class JobApproval(generics.GenericAPIView):
             job.status = Job.Status.REJECTED
             job.rejection_feedback = ser.validated_data.get("rejection_feedback", "")
         job.save()
+
+        # Send notification to company
+        from apps.notifications.models import Notification
+        action = "Approved" if job.status == Job.Status.APPROVED else "Rejected"
+        Notification.objects.create(
+            user=job.company.user,
+            kind=Notification.Kind.JOB_APPROVAL,
+            title=f"Job {action}",
+            message=f"Your job posting '{job.title}' was {action.lower()}.",
+            link=f"/jobs/{job.id}"
+        )
+
         return Response(JobSerializer(job).data)
 
 

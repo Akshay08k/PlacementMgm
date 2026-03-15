@@ -32,6 +32,17 @@ class ApplicationCreate(generics.CreateAPIView):
         ctx["student"] = StudentProfile.objects.get(user=self.request.user)
         return ctx
 
+    def perform_create(self, serializer):
+        app = serializer.save()
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            user=app.student.user,
+            kind=Notification.Kind.APPLICATION_UPDATE,
+            title="Application Submitted",
+            message=f"You successfully applied for {app.job.title} at {app.job.company.name}.",
+            link=f"/applications/{app.id}"
+        )
+
 
 class ApplicationDetail(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -64,6 +75,16 @@ class ApplicationSelect(generics.GenericAPIView):
         student.placement_status = StudentProfile.PlacementStatus.PLACED
         student.placed_company_name = app.job.company.name
         student.save(update_fields=["placement_status", "placed_company_name"])
+        
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            user=student.user,
+            kind=Notification.Kind.PLACEMENT_CONFIRM,
+            title=f"Selected by {app.job.company.name}",
+            message=f"Congratulations! You have been selected for {app.job.title}.",
+            link=f"/applications/{app.id}"
+        )
+        
         return Response(ApplicationSerializer(app).data)
 
 
@@ -81,6 +102,16 @@ class ApplicationShortlist(generics.GenericAPIView):
             return Response({"detail": "Cannot shortlist this application."}, status=status.HTTP_400_BAD_REQUEST)
         app.status = Application.Status.SHORTLISTED
         app.save(update_fields=["status", "updated_at"])
+
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            user=app.student.user,
+            kind=Notification.Kind.APPLICATION_UPDATE,
+            title=f"Application Shortlisted",
+            message=f"Your application for {app.job.title} at {app.job.company.name} has been shortlisted.",
+            link=f"/applications/{app.id}"
+        )
+
         return Response(ApplicationSerializer(app).data)
 
 
@@ -98,6 +129,16 @@ class ApplicationReject(generics.GenericAPIView):
             return Response({"detail": "Cannot reject a selected candidate."}, status=status.HTTP_400_BAD_REQUEST)
         app.status = Application.Status.REJECTED
         app.save(update_fields=["status", "updated_at"])
+
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            user=app.student.user,
+            kind=Notification.Kind.APPLICATION_UPDATE,
+            title=f"Application Update",
+            message=f"Your application for {app.job.title} at {app.job.company.name} was not selected to move forward.",
+            link=f"/applications/{app.id}"
+        )
+
         return Response(ApplicationSerializer(app).data)
 
 
@@ -144,4 +185,15 @@ class ApplicationAdvanceRound(generics.GenericAPIView):
         if app.status == Application.Status.APPLIED:
             app.status = Application.Status.SHORTLISTED
         app.save(update_fields=["status", "current_round", "updated_at"])
+
+        from apps.notifications.models import Notification
+        round_display = dict(Application.InterviewRound.choices).get(next_round, next_round)
+        Notification.objects.create(
+            user=app.student.user,
+            kind=Notification.Kind.INTERVIEW_SCHEDULE,
+            title=f"Advanced to {round_display}",
+            message=f"You've advanced to the {round_display} round for {app.job.title} at {app.job.company.name}.",
+            link=f"/applications/{app.id}"
+        )
+
         return Response(ApplicationSerializer(app).data)

@@ -5,7 +5,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import openpyxl
-
+from django.utils.crypto import get_random_string
 from apps.accounts.permissions import IsTPOOrAdmin, IsStudent
 from apps.students.models import Course, Department, StudentProfile
 from apps.accounts.models import User
@@ -113,7 +113,7 @@ class StudentExcelImport(APIView):
                 user = User.objects.create_user(
                     username=email,
                     email=email,
-                    password=User.objects.make_random_password(length=16),
+                    password=get_random_string(16),
                     role=User.Role.STUDENT,
                 )
                 dep_id = int(row[4]) if len(row) > 4 and row[4] is not None else None

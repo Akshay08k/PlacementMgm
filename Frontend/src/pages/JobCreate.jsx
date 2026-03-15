@@ -10,6 +10,8 @@ export default function JobCreatePage() {
     location: "",
     eligibility_criteria: "",
     min_cgpa: "",
+    min_10th_percent: "",
+    min_12th_percent: "",
     skills_required: "",
     num_vacancies: "1",
     jd_pdf_url: "",
@@ -56,6 +58,8 @@ export default function JobCreatePage() {
       await axios.post("/companies/jobs/", {
         ...form,
         min_cgpa: form.min_cgpa ? parseFloat(form.min_cgpa) : null,
+        min_10th_percent: form.min_10th_percent ? parseFloat(form.min_10th_percent) : null,
+        min_12th_percent: form.min_12th_percent ? parseFloat(form.min_12th_percent) : null,
         num_vacancies: parseInt(form.num_vacancies, 10) || 1,
       });
       navigate("/jobs");
@@ -93,12 +97,22 @@ export default function JobCreatePage() {
           <label className="block text-sm font-medium text-slate-700 mb-1">Eligibility</label>
           <textarea name="eligibility_criteria" value={form.eligibility_criteria} onChange={handleChange} rows={2} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Min CGPA</label>
-            <input type="number" step="0.01" name="min_cgpa" value={form.min_cgpa} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
+            <input type="number" step="0.01" name="min_cgpa" value={form.min_cgpa} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-2" placeholder="e.g. 7.5" />
           </div>
           <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Min 10th %</label>
+            <input type="number" step="0.01" name="min_10th_percent" value={form.min_10th_percent} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-2" placeholder="e.g. 60" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Min 12th/Diploma %</label>
+            <input type="number" step="0.01" name="min_12th_percent" value={form.min_12th_percent} onChange={handleChange} className="w-full rounded-lg border border-slate-300 px-4 py-2" placeholder="e.g. 60" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-slate-700 mb-1">No. of Vacancies</label>
             <input type="number" name="num_vacancies" value={form.num_vacancies} onChange={handleChange} min={1} className="w-full rounded-lg border border-slate-300 px-4 py-2" />
           </div>

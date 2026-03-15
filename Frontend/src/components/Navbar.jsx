@@ -5,6 +5,7 @@ import { useInstituteConfig } from "../contexts/InstituteConfigContext"
 import { MdMenu, MdClose, MdDashboard } from "react-icons/md"
 import { FaUserCircle } from "react-icons/fa"
 import { BiLogOut } from "react-icons/bi"
+import NotificationBell from "./NotificationBell"
 
 const NAV_LINKS = {
   student: [
@@ -21,7 +22,7 @@ const NAV_LINKS = {
     { label: "Companies", path: "/companies" },
     { label: "Jobs", path: "/jobs" },
     { label: "Drives", path: "/drives" },
-    { label: "Resources", path: "/resources" },
+    { label: "Resources", path: "/admin-resources" },
     { label: "Institute", path: "/settings/institute" },
   ],
   admin: [
@@ -30,7 +31,7 @@ const NAV_LINKS = {
     { label: "Companies", path: "/companies" },
     { label: "Jobs", path: "/jobs" },
     { label: "Drives", path: "/drives" },
-    { label: "Resources", path: "/resources" },
+    { label: "Resources", path: "/admin-resources" },
     { label: "Institute", path: "/settings/institute" },
   ],
   company: [
@@ -142,6 +143,10 @@ export default function Navbar() {
           )}
 
           <div className="flex items-center gap-3">
+            
+            {isAuthenticated && (
+              <NotificationBell />
+            )}
 
             {isAuthenticated && (
               <div className="relative hidden md:block">

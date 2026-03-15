@@ -37,6 +37,14 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
 }
 
 function EditPanel({ student, form, onChange, onSubmit, onCancel, saving }) {
+  const [departments, setDepartments] = useState([]);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    axios.get("/students/departments/").then(r => setDepartments(Array.isArray(r.data) ? r.data : r.data.results || []));
+    axios.get("/students/courses/").then(r => setCourses(Array.isArray(r.data) ? r.data : r.data.results || []));
+  }, []);
+
   return (
     <div className="mb-5 bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 bg-amber-50 border-b border-amber-100">
@@ -49,46 +57,127 @@ function EditPanel({ student, form, onChange, onSubmit, onCancel, saving }) {
         </button>
       </div>
       <form onSubmit={onSubmit} className="p-5 space-y-4">
-        <div className="grid grid-cols-3 gap-3">
+        
+        {/* Row 1: Basic Identity */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Full Name</label>
-            <input name="full_name" value={form.full_name} onChange={onChange} className={inputCls} />
+            <input name="full_name" value={form.full_name || ""} onChange={onChange} className={inputCls} />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Enrollment No.</label>
-            <input name="enrollment_number" value={form.enrollment_number} onChange={onChange} className={inputCls} />
+            <input name="enrollment_number" value={form.enrollment_number || ""} onChange={onChange} className={inputCls} />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Roll No.</label>
-            <input name="roll_number" value={form.roll_number} onChange={onChange} className={inputCls} />
+            <input name="roll_number" value={form.roll_number || ""} onChange={onChange} className={inputCls} />
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-3">
+
+        {/* Row 2: Personal Details */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Passing Year</label>
-            <input name="passing_year" type="number" value={form.passing_year} onChange={onChange} className={inputCls} />
+            <label className="block text-xs font-medium text-slate-600 mb-1">Phone</label>
+            <input name="phone" value={form.phone || ""} onChange={onChange} className={inputCls} />
           </div>
           <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Date of Birth</label>
+            <input name="date_of_birth" type="date" value={form.date_of_birth || ""} onChange={onChange} className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Gender</label>
+            <select name="gender" value={form.gender || ""} onChange={onChange} className={inputCls}>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Location</label>
+            <input name="location" value={form.location || ""} onChange={onChange} className={inputCls} />
+          </div>
+        </div>
+
+        {/* Row 3: Academics mapping */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Department</label>
+            <select name="department_id" value={form.department_id || ""} onChange={onChange} className={inputCls}>
+              <option value="">Select Department</option>
+              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Course</label>
+            <select name="course_id" value={form.course_id || ""} onChange={onChange} className={inputCls}>
+              <option value="">Select Course</option>
+              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Passing Year</label>
+            <input name="passing_year" type="number" value={form.passing_year || ""} onChange={onChange} className={inputCls} />
+          </div>
+        </div>
+
+        {/* Row 4: Marks */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">10th %</label>
-            <input name="marks_10th" type="number" step="0.01" value={form.marks_10th} onChange={onChange} className={inputCls} />
+            <input name="marks_10th" type="number" step="0.01" value={form.marks_10th || ""} onChange={onChange} className={inputCls} />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">12th %</label>
-            <input name="marks_12th" type="number" step="0.01" value={form.marks_12th} onChange={onChange} className={inputCls} />
+            <input name="marks_12th" type="number" step="0.01" value={form.marks_12th || ""} onChange={onChange} className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Diploma %</label>
+            <input name="diploma_marks" type="number" step="0.01" value={form.diploma_marks || ""} onChange={onChange} className={inputCls} />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">CGPA</label>
-            <input name="current_cgpa" type="number" step="0.01" value={form.current_cgpa} onChange={onChange} className={inputCls} />
+            <input name="current_cgpa" type="number" step="0.01" value={form.current_cgpa || ""} onChange={onChange} className={inputCls} />
           </div>
         </div>
-        <div className="w-48">
-          <label className="block text-xs font-medium text-slate-600 mb-1">Placement Status</label>
-          <select name="placement_status" value={form.placement_status} onChange={onChange} className={inputCls}>
-            <option value="unplaced">Unplaced</option>
-            <option value="placed">Placed</option>
-          </select>
+
+        {/* Row 5: Text Areas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+           <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Current Address</label>
+            <textarea name="current_address" value={form.current_address || ""} onChange={onChange} rows={2} className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Permanent Address</label>
+            <textarea name="permanent_address" value={form.permanent_address || ""} onChange={onChange} rows={2} className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Skills</label>
+            <textarea name="skills" value={form.skills || ""} onChange={onChange} rows={2} className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Education History</label>
+            <textarea name="education_history" value={form.education_history || ""} onChange={onChange} rows={2} className={inputCls} />
+          </div>
         </div>
-        <div className="flex gap-2 pt-1">
+
+        {/* Row 6: Placement & URLs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Placement Status</label>
+            <select name="placement_status" value={form.placement_status || "unplaced"} onChange={onChange} className={inputCls}>
+              <option value="unplaced">Unplaced</option>
+              <option value="placed">Placed</option>
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="block text-xs font-medium text-slate-600 mb-1">Placed Company Name</label>
+            <input name="placed_company_name" value={form.placed_company_name || ""} onChange={onChange} className={inputCls} />
+          </div>
+        </div>
+
+
+        <div className="flex gap-2 pt-1 border-t border-slate-100 mt-2">
           <button type="submit" disabled={saving} className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors">
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -164,18 +253,46 @@ export default function AdminStudentsPage() {
     setConfirm(null);
   };
 
-  const startEdit = (student) => {
+  const startEdit = async (student) => {
+    // We initially show placing holder state from list
     setEditing(student);
     setEditForm({
       full_name: student.full_name || "",
       enrollment_number: student.enrollment_number || "",
       roll_number: student.roll_number || "",
-      passing_year: student.passing_year || "",
-      marks_10th: student.marks_10th || "",
-      marks_12th: student.marks_12th || "",
-      current_cgpa: student.current_cgpa || "",
-      placement_status: student.placement_status || "unplaced",
     });
+
+    try {
+      // Fetch the full student details from DB
+      const res = await axios.get(`/students/${student.id}/`);
+      const fullData = res.data;
+      setEditForm({
+        full_name: fullData.full_name || "",
+        enrollment_number: fullData.enrollment_number || "",
+        roll_number: fullData.roll_number || "",
+        phone: fullData.phone || "",
+        date_of_birth: fullData.date_of_birth || "",
+        gender: fullData.gender || "",
+        location: fullData.location || "",
+        current_address: fullData.current_address || "",
+        permanent_address: fullData.permanent_address || "",
+        department_id: fullData.department?.id || "",
+        course_id: fullData.course?.id || "",
+        passing_year: fullData.passing_year || "",
+        marks_10th: fullData.marks_10th || "",
+        marks_12th: fullData.marks_12th || "",
+        diploma_marks: fullData.diploma_marks || "",
+        current_cgpa: fullData.current_cgpa || "",
+        skills: fullData.skills || "",
+        education_history: fullData.education_history || "",
+        resume_url: fullData.resume_url || "",
+        placement_status: fullData.placement_status || "unplaced",
+        placed_company_name: fullData.placed_company_name || "",
+      });
+    } catch (err) {
+       console.error("Failed to fetch full student details", err);
+    }
+    
     setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
   };
 
@@ -189,18 +306,38 @@ export default function AdminStudentsPage() {
     if (!editing) return;
     setSaving(true);
     try {
-      const payload = {
-        ...editForm,
-        passing_year: editForm.passing_year ? parseInt(editForm.passing_year, 10) : null,
-        marks_10th: editForm.marks_10th || null,
-        marks_12th: editForm.marks_12th || null,
-        current_cgpa: editForm.current_cgpa || null,
-      };
+      const payload = { ...editForm };
+      
+      // Nullify empty numeric/date fields to avoid DRF validation errors
+      const numberFields = ["passing_year", "marks_10th", "marks_12th", "diploma_marks", "current_cgpa"];
+      numberFields.forEach(f => {
+        if (!payload[f] || payload[f] === "") payload[f] = null;
+      });
+
+      if (!payload.date_of_birth || payload.date_of_birth === "") payload.date_of_birth = null;
+      if (!payload.department_id || payload.department_id === "") payload.department_id = null;
+      if (!payload.course_id || payload.course_id === "") payload.course_id = null;
+
       const res = await axios.patch(`/students/${editing.id}/`, payload);
-      setStudents((prev) => prev.map((s) => s.id === editing.id ? { ...s, ...res.data } : s));
+      
+      // Update the local list state so UI reflects new name/dept without refresh
+      setStudents((prev) => prev.map((s) => s.id === editing.id ? { 
+        ...s, 
+        full_name: res.data.full_name,
+        roll_number: res.data.roll_number,
+        enrollment_number: res.data.enrollment_number,
+        placement_status: res.data.placement_status,
+        department_name: res.data.department?.name,
+        course_name: res.data.course?.name,
+        passing_year: res.data.passing_year,
+        current_cgpa: res.data.current_cgpa,
+      } : s));
+      
       setEditing(null);
       setEditForm({});
-    } catch (_) {}
+    } catch (_) {
+      console.error("Editing failed");
+    }
     finally { setSaving(false); }
   };
 

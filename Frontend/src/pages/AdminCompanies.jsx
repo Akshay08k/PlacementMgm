@@ -19,6 +19,7 @@ export default function AdminCompaniesPage() {
   const [search, setSearch]       = useState("");
   const [filterIndustry, setFilterIndustry] = useState("all");
   const [companyCreatePopup, setCompanyCreatePopup] = useState(false);
+  const [viewingCompany, setViewingCompany] = useState(null);
 
   const isAdminOrTpo = role === "tpo" || role === "admin";
 
@@ -55,6 +56,26 @@ export default function AdminCompaniesPage() {
 
   if (!isAdminOrTpo) return <div className="text-slate-500">Only TPO/Admin can view the companies list.</div>;
   if (loading) return <div className="text-slate-500">Loading companies…</div>;
+
+  const viewCompanyDetails = async (company) => {
+    // Show a basic popup immediately with available list data
+    setViewingCompany(company);
+
+    try {
+      // Fetch full company details including specialities and images
+      const res = await axios.get(`/companies/profile/list/`);
+      const fullDataList = Array.isArray(res.data) ? res.data : res.data.results || [];
+      const updatedCompany = fullDataList.find(c => c.id === company.id);
+      
+      if (updatedCompany) {
+         setViewingCompany(updatedCompany);
+         // Also update it in the list to avoid refetching
+         setCompanies(prev => prev.map(c => c.id === updatedCompany.id ? updatedCompany : c));
+      }
+    } catch (err) {
+      console.error("Failed to fetch full company details", err);
+    }
+  };
 
   return (
     <div>
@@ -164,6 +185,15 @@ export default function AdminCompaniesPage() {
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {c.created_at ? new Date(c.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                     </td>
+
+                    <td className="px-4 py-3 text-right">
+                       <button
+                         onClick={() => viewCompanyDetails(c)}
+                         className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors"
+                       >
+                          View Details
+                       </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -177,6 +207,93 @@ export default function AdminCompaniesPage() {
           </div>
         )}
       </div>
+
+      {/* View Company Modal */}
+      {viewingCompany && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="text-lg font-bold text-slate-800">Company Details</h2>
+              <button 
+                onClick={() => setViewingCompany(null)}
+                className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-lg transition-colors"
+               >
+                <MdClose />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex items-start gap-5 mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-violet-600 to-indigo-800 flex items-center justify-center text-white text-2xl font-bold shadow-md shrink-0">
+                  {(viewingCompany.name || "C").charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-800 leading-tight">{viewingCompany.name}</h1>
+                  <p className="text-slate-500 mt-1 flex items-center gap-2">
+                    <IndustryBadge industry={viewingCompany.industry} />
+                    {viewingCompany.website && (
+                      <a href={viewingCompany.website} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald-600 hover:underline">
+                        Website ↗
+                      </a>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <h3 className="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-3">Contact Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="block text-xs text-slate-500">Email</span>
+                      <span className="text-sm text-slate-800 font-medium">{viewingCompany.contact_email || viewingCompany.email || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-500">Phone</span>
+                      <span className="text-sm text-slate-800 font-medium">{viewingCompany.contact_phone || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-500">Address</span>
+                      <span className="text-sm text-slate-800">{viewingCompany.address || "—"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-3">Company Information</h3>
+                  <div className="space-y-3">
+                     <div>
+                      <span className="block text-xs text-slate-500">Established Year</span>
+                      <span className="text-sm text-slate-800 font-medium">{viewingCompany.established_year || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-500">Specialities</span>
+                      <span className="text-sm text-slate-800 whitespace-pre-wrap">{viewingCompany.specialities || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-500">Description</span>
+                      <span className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">{viewingCompany.description || "—"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {viewingCompany.client_images && viewingCompany.client_images.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold tracking-widest text-slate-400 uppercase mb-3">Client Gallery</h3>
+                  <div className="flex flex-wrap gap-4">
+                    {viewingCompany.client_images.map((imgUrl, idx) => (
+                      <img key={idx} src={imgUrl} alt="Client" className="w-32 h-32 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
