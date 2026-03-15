@@ -7,6 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from apps.students.models import Department
+
 
 User = get_user_model()
 
@@ -14,6 +16,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(read_only=True)
     must_change_password = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -25,12 +28,18 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "role",
             "must_change_password",
+            "profile_picture",
         ]
 
     def get_must_change_password(self, obj):
-        if obj.is_company and hasattr(obj, "company_profile"):
+        if getattr(obj, "is_company", False) and hasattr(obj, "company_profile"):
             return obj.company_profile.must_change_password
         return False
+
+    def get_profile_picture(self, obj):
+        if getattr(obj, "is_student", False) and hasattr(obj, "student_profile"):
+            return obj.student_profile.profile_picture
+        return None
 
 
 class StudentRegisterSerializer(serializers.Serializer):
@@ -113,19 +122,21 @@ class StudentRegisterSerializer(serializers.Serializer):
             "permanent_address",
             "education_history",
         }
-        email = validated_data.pop("email")
+        email = validated_data.pop("email").strip().lower()
         password = validated_data.pop("password")
-        full_name = validated_data.pop("full_name")
-        roll_number = validated_data.pop("roll_number")
+        full_name = validated_data.pop("full_name").strip()
+        roll_number = validated_data.pop("roll_number").strip()
         department = validated_data.pop("department_id", None)
         course = validated_data.pop("course_id", None)
+        
         if department is not None:
-            from apps.students.models import Department
             department = Department.objects.get(pk=department)
         if course is not None:
             from apps.students.models import Course
             course = Course.objects.get(pk=course)
+            
         profile_data = {k: v for k, v in validated_data.items() if k in profile_fields}
+        
         user = User.objects.create_user(
             username=email,
             email=email,

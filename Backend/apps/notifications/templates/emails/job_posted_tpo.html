@@ -1,0 +1,17 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello TPO / Admin,</p>
+
+<p>A new job posting is awaiting your review and approval on the platform.</p>
+
+<div class="details-box">
+    <p><strong>Company:</strong> {{ job.company.name }}</p>
+    <p><strong>Job Title:</strong> {{ job.title }}</p>
+    <p><strong>Package:</strong> {{ job.package|default:"Not specified" }}</p>
+</div>
+
+<p>Please log in to the portal to review the job details and approve/reject it.</p>
+
+<a href="{{ settings.FRONTEND_BASE_URL }}/tpo/jobs/{{ job.id }}" class="btn">View Job Details</a>
+{% endblock %}

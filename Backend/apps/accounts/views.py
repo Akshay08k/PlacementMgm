@@ -143,20 +143,9 @@ class PasswordResetRequestAPIView(generics.GenericAPIView):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             reset_link = f"{getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:5173')}/reset-password?uid={uid}&token={token}"
-            subject = "Password reset request"
-            message = (
-                "You requested a password reset.\n\n"
-                f"Reset your password using this link:\n{reset_link}\n\n"
-                "If you did not request this, you can ignore this email."
-            )
             try:
-                send_mail(
-                    subject,
-                    message,
-                    getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@placement.local"),
-                    [user.email],
-                    fail_silently=True,
-                )
+                from apps.notifications.tasks import send_password_reset_email
+                send_password_reset_email.delay(user.id, reset_link)
             except Exception:
                 pass
 

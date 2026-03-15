@@ -98,7 +98,7 @@ class StudentExcelImport(APIView):
             if not row or all(c is None for c in row):
                 continue
             try:
-                email = str(row[0]).strip() if row[0] else None
+                email = str(row[0]).strip().lower() if row[0] else None
                 full_name = str(row[1]).strip() if row[1] else None
                 roll_number = str(row[3]).strip() if len(row) > 3 and row[3] else None
                 if not email or not full_name or not roll_number:

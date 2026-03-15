@@ -1,0 +1,19 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello Student,</p>
+
+<p>A new placement opportunity matches your profile!</p>
+
+<div class="details-box">
+    <p><strong>Company:</strong> {{ job.company.name }}</p>
+    <p><strong>Role:</strong> {{ job.title }}</p>
+    <p><strong>Location:</strong> {{ job.location|default:"Not specified" }}</p>
+    <p><strong>Eligibility:</strong> {{ job.eligibility_criteria|default:"See details on portal" }}</p>
+    <p><strong>Package:</strong> {{ job.package|default:"Not specified" }}</p>
+</div>
+
+<p>If you are interested, please log in to the placement portal to apply before the deadline.</p>
+
+<a href="{{ settings.FRONTEND_BASE_URL }}/student/jobs/{{ job.id }}" class="btn">Apply Now</a>
+{% endblock %}

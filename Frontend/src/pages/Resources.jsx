@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../utils/AxiosInstance";
-import {FaLink, FaFilePdf, FaFileAlt} from 'react-icons/fa';  
+import {FaLink, FaFilePdf, FaFileAlt, FaFileExport, FaDownload} from 'react-icons/fa';  
 
 export default function ResourcesPage() {
   const [items, setItems] = useState([]);
@@ -41,6 +41,7 @@ export default function ResourcesPage() {
         {items.length === 0 && (
           <p className="text-slate-500 text-sm">No resources have been shared yet.</p>
         )}
+        {items.map((item) => (
           <a
             key={item.id}
             href={item.link}
@@ -49,7 +50,7 @@ export default function ResourcesPage() {
             className="flex items-center gap-4 bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition cursor-pointer"
           >
             <div className={`p-3 rounded-xl flex-shrink-0 ${item.resource_type === 'link' ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'}`}>
-              {item.resource_type === 'link' ? <FaLink className="w-6 h-6" /> : <FaFileText className="w-6 h-6" />}
+              {item.resource_type === 'link' ? <FaLink className="w-6 h-6" /> : <FaFileExport className="w-6 h-6" />}
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-slate-800">{item.title}</h3>
@@ -58,9 +59,10 @@ export default function ResourcesPage() {
               )}
             </div>
             <div className="text-slate-400 p-2 hover:bg-slate-50 hover:text-indigo-600 rounded-lg">
-                <Download className="w-5 h-5" />
+                <FaDownload className="w-5 h-5" />
             </div>
           </a>
+        ))}
       </div>
     </div>
   );

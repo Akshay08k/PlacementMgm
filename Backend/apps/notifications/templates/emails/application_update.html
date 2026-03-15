@@ -1,0 +1,19 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello Student,</p>
+
+<p>There is an update regarding your application for <strong>{{ application.job.title }}</strong> at <strong>{{ application.job.company.name }}</strong>.</p>
+
+<div class="details-box">
+    <p><strong>Current Status:</strong> {{ application.get_status_display }}</p>
+    <p><strong>Current Round:</strong> {{ application.get_current_round_display }}</p>
+    {% if application.round_notes %}
+        <p><strong>Notes / Feedback:</strong> {{ application.round_notes }}</p>
+    {% endif %}
+</div>
+
+<p>Log in to your dashboard to stay updated regarding further instructions, interview times, or any action required from your side.</p>
+
+<a href="{{ settings.FRONTEND_BASE_URL }}/student/applications" class="btn">View Applications</a>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello {{ profile.full_name }},</p>
+
+<p>Welcome to the <strong>Placement Management Portal</strong>.</p>
+
+<p>Your account has been successfully registered. You can now log in, update your profile, and start applying for placements.</p>
+
+<div class="details-box">
+    <p><strong>Email / Login ID:</strong> {{ user.email }}</p>
+    <p><strong>Roll Number:</strong> {{ profile.roll_number }}</p>
+</div>
+
+<p>If you haven't set a password yet, please use the "Forgot Password" functionality or follow the instructions from your TPO.</p>
+
+<a href="{{ settings.FRONTEND_BASE_URL }}/login" class="btn">Login to Portal</a>
+{% endblock %}

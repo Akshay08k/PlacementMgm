@@ -154,10 +154,24 @@ export default function Navbar() {
                   onClick={() => setUserMenu(!userMenu)}
                   className="flex items-center gap-2"
                 >
-                  <FaUserCircle className="text-xl text-gray-600" />
+                  {user?.profile_picture ? (
+                    <img 
+                      src={user.profile_picture} 
+                      alt="avatar" 
+                      className="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                    />
+                  ) : user?.student_profile?.profile_picture ? (
+                    <img 
+                      src={user.student_profile.profile_picture} 
+                      alt="avatar" 
+                      className="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                    />
+                  ) : (
+                    <FaUserCircle className="text-xl text-gray-600" />
+                  )}
                   <span className="text-sm font-medium">
                     
-                    {user?.first_name + " " + user?.last_name || "User"}
+                    {(user?.first_name || user?.last_name) ? `${user?.first_name} ${user?.last_name}` : "User"}
                     </span>
                 </button>
 

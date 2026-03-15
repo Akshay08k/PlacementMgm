@@ -1,0 +1,20 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello {{ profile.full_name }},</p>
+
+{% if profile.placement_status == 'placed' %}
+    <h2>🎉 Congratulations! 🎉</h2>
+    <p>We are delighted to inform you that your placement has been confirmed.</p>
+    
+    <div class="details-box">
+        <p><strong>Company:</strong> {{ profile.placed_company_name|default:"Refer to portal for details" }}</p>
+    </div>
+    <p>We wish you a bright and successful career ahead!</p>
+{% else %}
+    <p>There has been an important update to your student profile details.</p>
+    <p>Please log in to your dashboard to review any changes or messages left by the TPO / administration.</p>
+{% endif %}
+
+<a href="{{ settings.FRONTEND_BASE_URL }}/student/profile" class="btn">View Profile</a>
+{% endblock %}

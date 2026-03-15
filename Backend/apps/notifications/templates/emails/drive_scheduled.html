@@ -1,0 +1,23 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p>Hello Student,</p>
+
+<p>A placement drive has been scheduled that you might be eligible for or have applied to.</p>
+
+<div class="details-box">
+    <p><strong>Company:</strong> {{ drive.company.name }}</p>
+    <p><strong>Drive Title:</strong> {{ drive.title }}</p>
+    <p><strong>Date:</strong> {{ drive.drive_date }}</p>
+    
+    {% if drive.location_or_link %}
+    <p><strong>Location / Link:</strong> <a href="{{ drive.location_or_link }}">{{ drive.location_or_link }}</a></p>
+    {% endif %}
+    
+    {% if drive.instructions %}
+        <p><strong>Instructions:</strong> {{ drive.instructions }}</p>
+    {% endif %}
+</div>
+
+<p>Please make sure to mark your calendar and follow any instructions provided for the drive.</p>
+{% endblock %}
