@@ -51,6 +51,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "current_cgpa",
             "skills",
             "education_history",
+            "profile_picture",
             "resume_url",
             "placement_status",
             "placed_company_name",
@@ -78,6 +79,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "permanent_address",
             "skills",
             "education_history",
+            "profile_picture",
             "resume_url",
             "job_alerts_enabled",
         }

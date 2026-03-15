@@ -11,6 +11,7 @@ class ResourceSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "link",
+            "resource_type",
             "audience",
             "created_at",
         ]

@@ -22,6 +22,14 @@ class IsCompany(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_company
 
+class IsCompanyOrTPOOrAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and (request.user.is_company or request.user.is_tpo_or_admin)
+        )
+
 
 class IsCompanyOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):

@@ -88,6 +88,44 @@ class UploadResumeView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UploadProfilePictureView(APIView):
+    """Student uploads profile picture; returns Cloudinary URL."""
+    permission_classes = [permissions.IsAuthenticated, IsStudent]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"error": "No file. Use multipart form key 'file'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        upload = get_cloudinary_upload()
+        if not upload:
+            return Response(
+                {"error": "Cloudinary not configured."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        try:
+            result = upload(
+                file,
+                resource_type="image",
+                folder="placement_portal/avatars",
+                use_filename=True,
+                unique_filename=True,
+            )
+            url = result.get("secure_url") or result.get("url")
+            if not url:
+                return Response({"error": "Upload failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            profile = StudentProfile.objects.get(user=request.user)
+            profile.profile_picture = url
+            profile.save(update_fields=["profile_picture"])
+            return Response({"url": url, "profile_picture": url})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class GenerateResumePDFView(APIView):
     """Generate and download PDF resume from student profile."""
     permission_classes = [permissions.IsAuthenticated, IsStudent]

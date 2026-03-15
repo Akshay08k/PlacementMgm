@@ -21,6 +21,27 @@ class Drive(models.Model):
         blank=True,
         help_text="Optional: link to a specific job",
     )
+    
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending Approval"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    rejection_feedback = models.TextField(blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_drives",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
     title = models.CharField(max_length=200)
     drive_date = models.DateField()
     location_or_link = models.CharField(

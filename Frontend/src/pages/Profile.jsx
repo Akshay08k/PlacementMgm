@@ -58,6 +58,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [form, setForm] = useState({});
   const [activeTab, setActiveTab] = useState("personal");
   const navigate = useNavigate();
@@ -85,6 +87,67 @@ export default function ProfilePage() {
       setTimeout(() => setSaved(false), 2500);
     } catch (_) {}
     setSaving(false);
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post("/students/upload-avatar/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data?.profile_picture) {
+        setForm((prev) => ({ ...prev, profile_picture: res.data.profile_picture }));
+        setProfile((prev) => ({ ...prev, profile_picture: res.data.profile_picture }));
+      }
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      alert("Failed to upload avatar. Please try again.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleCompanyImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post("/companies/profile/upload-images/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data?.client_images) {
+        setForm((prev) => ({ ...prev, client_images: res.data.client_images }));
+        setProfile((prev) => ({ ...prev, client_images: res.data.client_images }));
+      }
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveCompanyImage = async (imageUrl) => {
+    try {
+      const res = await axios.post("/companies/profile/remove-image/", { image_url: imageUrl });
+      if (res.data?.client_images) {
+        setForm((prev) => ({ ...prev, client_images: res.data.client_images }));
+        setProfile((prev) => ({ ...prev, client_images: res.data.client_images }));
+      }
+    } catch (err) {
+      console.error("Failed to remove image:", err);
+      alert("Failed to remove image. Please try again.");
+    }
   };
 
   if (loading) return (
@@ -117,9 +180,42 @@ export default function ProfilePage() {
     return (
       <div className="w-full">
         <div className="flex items-start gap-5 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-lg font-bold shadow-md shadow-emerald-100 shrink-0">
-            {initials}
+          <div className="relative group shrink-0">
+            {form.profile_picture ? (
+              <img
+                src={form.profile_picture}
+                alt="Profile"
+                className="w-16 h-16 rounded-2xl object-cover shadow-sm border border-slate-200"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-xl font-bold shadow-md shadow-emerald-100">
+                {initials}
+              </div>
+            )}
+            
+            {/* Upload Overlay */}
+            <label className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              {uploadingAvatar ? (
+                <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
+              />
+            </label>
           </div>
+
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-slate-800 leading-tight">{form.full_name || "Your Profile"}</h1>
             <p className="text-sm text-slate-400 mt-0.5">{form.department?.name} · {form.course?.name}</p>
@@ -374,18 +470,73 @@ export default function ProfilePage() {
                   <EditInput name="website" value={form.website || ""} onChange={handleChange} placeholder="https://acme.com" />
                 </Field>
               </div>
+              <Field label="Established Year">
+                <EditInput name="established_year" type="number" value={form.established_year || ""} onChange={handleChange} placeholder="2010" />
+              </Field>
+            </div>
+             <div className="grid grid-cols-2 gap-4">
+               <Field label="Contact Email">
+                <EditInput name="contact_email" value={form.contact_email || ""} onChange={handleChange} placeholder="hr@acme.com" type="email" />
+              </Field>
               <Field label="Contact Phone">
                 <EditInput name="contact_phone" value={form.contact_phone || ""} onChange={handleChange} placeholder="+91 98765 43210" />
               </Field>
             </div>
+            
             <div className="grid grid-cols-2 gap-6">
               <Field label="Description">
                 <EditTextarea name="description" value={form.description || ""} onChange={handleChange} rows={4} placeholder="Tell students about your company…" />
               </Field>
-              <Field label="Contact Email">
-                <EditInput name="contact_email" value={form.contact_email || ""} onChange={handleChange} placeholder="hr@acme.com" type="email" />
+              <Field label="Specialities" hint="Comma separated specialities/domain working field">
+                 <EditTextarea name="specialities" value={form.specialities || ""} onChange={handleChange} rows={4} placeholder="e.g. AI, Healthcare, Cloud Computing" />
               </Field>
             </div>
+
+            <SectionDivider label="Client & Corporate Gallery" />
+            
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-4">
+                {(form.client_images || []).map((url, idx) => (
+                  <div key={idx} className="relative group w-32 h-32 rounded-xl overflow-hidden border border-slate-200">
+                    <img src={url} alt="Client/Gallery" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCompanyImage(url)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      title="Remove image"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                
+                <label className="w-32 h-32 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-emerald-500 hover:border-emerald-300 hover:bg-emerald-50 transition-colors cursor-pointer relative">
+                  {uploadingImage ? (
+                    <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-xs font-medium">Add Image</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCompanyImageUpload}
+                    disabled={uploadingImage}
+                  />
+                </label>
+              </div>
+            </div>
+
           </div>
         </div>
 

@@ -101,6 +101,7 @@ class StudentProfile(models.Model):
         blank=True,
         help_text="Past education history / projects / experience for resume",
     )
+    profile_picture = models.URLField(max_length=500, blank=True, help_text="Cloudinary URL")
     resume_url = models.URLField(max_length=500, blank=True, help_text="Cloudinary URL")
     placement_status = models.CharField(
         max_length=20,

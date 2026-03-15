@@ -44,6 +44,7 @@ class Application(models.Model):
         blank=True,
     )
     round_notes = models.TextField(blank=True)
+    attended = models.BooleanField(default=False, help_text="Did the student attend the drive?")
     applied_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

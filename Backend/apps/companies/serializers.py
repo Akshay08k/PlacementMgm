@@ -16,9 +16,11 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
             "logo_url",
             "website",
             "description",
-            "contact_email",
             "contact_phone",
             "industry",
+            "established_year",
+            "specialities",
+            "client_images",
             "address",
             "must_change_password",
             "created_at",
@@ -37,6 +39,7 @@ class CompanyProfileListSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
+    eligibility_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -50,6 +53,9 @@ class JobSerializer(serializers.ModelSerializer):
             "location",
             "eligibility_criteria",
             "min_cgpa",
+            "min_10th_percent",
+            "min_12th_percent",
+            "eligibility_status",
             "skills_required",
             "num_vacancies",
             "jd_pdf_url",
@@ -70,6 +76,36 @@ class JobSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def get_eligibility_status(self, obj):
+        request = self.context.get("request")
+        if not request or not hasattr(request.user, 'student_profile'):
+            return {"is_eligible": True, "reasons": []}  # Not a student, rule doesn't apply directly here
+
+        student = request.user.student_profile
+        is_eligible = True
+        reasons = []
+
+        if obj.min_cgpa and (student.current_cgpa is None or student.current_cgpa < obj.min_cgpa):
+            is_eligible = False
+            reasons.append(f"Requires CGPA >= {obj.min_cgpa}")
+
+        if obj.min_10th_percent and (student.marks_10th is None or student.marks_10th < obj.min_10th_percent):
+            is_eligible = False
+            reasons.append(f"Requires 10th marks >= {obj.min_10th_percent}%")
+
+        if obj.min_12th_percent and (student.marks_12th is None or student.marks_12th < obj.min_12th_percent):
+            is_eligible = False
+            reasons.append(f"Requires 12th marks >= {obj.min_12th_percent}%")
+
+        if getattr(student, 'placement_status', '') == "placed":
+             is_eligible = False
+             reasons.append("You are already placed.")
+
+        return {
+            "is_eligible": is_eligible,
+            "reasons": reasons
+        }
+
 
 class JobListSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
@@ -83,6 +119,8 @@ class JobListSerializer(serializers.ModelSerializer):
             "package",
             "location",
             "min_cgpa",
+            "min_10th_percent",
+            "min_12th_percent",
             "status",
             "num_vacancies",
             "hiring_flow",
